@@ -5,6 +5,16 @@
 export function readServerEnv(name: string): string | undefined {
   const value = process.env[name];
   if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
+  let trimmed = value.trim();
+  // Common paste mistakes from dashboard copy/paste.
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    trimmed = trimmed.slice(1, -1).trim();
+  }
+  if (/^bearer\s+/i.test(trimmed)) {
+    trimmed = trimmed.replace(/^bearer\s+/i, "").trim();
+  }
   return trimmed.length > 0 ? trimmed : undefined;
 }
