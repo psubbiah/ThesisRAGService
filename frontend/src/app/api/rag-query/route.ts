@@ -118,7 +118,10 @@ export async function POST(request: Request) {
       }
     }
 
-    const openaiApiKey = readServerEnv("OPENAI_API_KEY");
+    // Prefer THESIS_OPENAI_API_KEY so a fresh App Secret can replace a stale
+    // OPENAI_API_KEY value that Cursor kept re-binding.
+    const openaiApiKey =
+      readServerEnv("THESIS_OPENAI_API_KEY") || readServerEnv("OPENAI_API_KEY");
     const openaiChatModel = readServerEnv("OPENAI_CHAT_MODEL") || "gpt-4o-mini";
 
     const local = await localThesisQuery(query, {
