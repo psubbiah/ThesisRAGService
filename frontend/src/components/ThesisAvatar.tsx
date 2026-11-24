@@ -15,7 +15,12 @@ import {
   type AnamPersonaOptionId,
 } from "@/config/persona";
 import { THESIS_SHORT_TITLE } from "@/config/thesis";
-import { formatSourceLabel, queryRag, type RagSource } from "@/lib/rag";
+import {
+  formatSourceLabel,
+  formatSourceSnippet,
+  queryRag,
+  type RagSource,
+} from "@/lib/rag";
 
 type ConnectionState = "idle" | "connecting" | "connected" | "error";
 
@@ -374,7 +379,7 @@ export function ThesisAvatar() {
                           </p>
                         )}
                       <p className="mt-1 font-[family-name:var(--font-serif)] text-sm leading-relaxed text-[var(--muted)]">
-                        {source.content}
+                        {formatSourceSnippet(source.content)}
                       </p>
                     </div>
                   </li>

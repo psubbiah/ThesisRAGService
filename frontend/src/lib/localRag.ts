@@ -233,7 +233,8 @@ function toSources(
 ): RagSource[] {
   return chosen.map(({ chunk, score }) => ({
     title: chunk.title,
-    content: excerpt(chunk.text),
+    // Plain-text snippet for the UI — raw markdown hashes looked broken in Sources.
+    content: cleanExcerpt(chunk.text, 320),
     chapter: chunk.chapter,
     chapter_title: chunk.chapter_title,
     page: chunk.page_start,
@@ -248,10 +249,17 @@ function toSources(
 
 function cleanExcerpt(text: string, limit = 220): string {
   const cleaned = text
-    .replace(/^#+\s*.+$/gm, "")
-    .replace(/\*\*/g, "")
-    .replace(/^\s*\d+\.\s*/gm, "")
+    // Keep heading/list wording; strip markdown markers so Sources read as prose.
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\s+#{1,6}\s+/g, ". ")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/\s+[-*+]\s+/g, ". ")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\n+/g, ". ")
     .replace(/\s+/g, " ")
+    .replace(/(\.\s*){2,}/g, ". ")
     .trim();
   return excerpt(cleaned, limit);
 }

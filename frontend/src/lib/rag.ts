@@ -23,6 +23,23 @@ export type RagResponse = {
   details?: string;
 };
 
+/** Plain-text snippet for Sources panel (strips markdown hashes/lists). */
+export function formatSourceSnippet(content: string, limit = 320): string {
+  const cleaned = content
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\s+#{1,6}\s+/g, ". ")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/\s+[-*+]\s+/g, ". ")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\n+/g, ". ")
+    .replace(/\s+/g, " ")
+    .replace(/(\.\s*){2,}/g, ". ")
+    .trim();
+  return cleaned.length <= limit ? cleaned : `${cleaned.slice(0, limit - 1)}…`;
+}
+
 export function formatSourceLabel(source: RagSource): string {
   if (source.citation) return source.citation;
 
