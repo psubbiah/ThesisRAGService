@@ -3,15 +3,15 @@ chapter: 1
 chapter_title: Introduction
 page_start: 1
 page_end: 14
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
-# Radical imaginaries of the Bolivarian Revolution — Overview
+# Between Marxplaining and Solidarity — Overview
 
 Author: Parvathi Subbiah
 Date: June 24, 2019
 
-This thesis investigates competing imaginaries of Venezuela held by two groups living outside the country: non-Venezuelan “Venezuela Solidarity Activists” who support the Bolivarian Revolution and the government of Nicolás Maduro, and Venezuelans in the diaspora who have left the country for a range of reasons and are largely opposed to the Maduro government.
+This thesis — *Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide* — examines the moral logic of Venezuela’s populist divide through two groups living outside the country: non-Venezuelan “Venezuela Solidarity Activists” who support the Bolivarian Revolution and the Maduro government, and Venezuelan migrants who largely blame the government for the crisis.
 
 The research combines semi-structured interviews, ethnography with solidarity organisations in the UK, and digital methods applied to published materials. It argues that both groups share a striking feature: a generalisable concept of “the people” (el pueblo) used to contest legitimacy, while placing blame for Venezuela’s crisis in opposite places — US sanctions and imperialism versus government mismanagement and authoritarianism.
 

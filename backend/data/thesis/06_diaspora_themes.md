@@ -3,7 +3,7 @@ chapter: 4
 chapter_title: Venezuelan diaspora perspectives
 page_start: 89
 page_end: 126
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
 # Themes from Venezuelan diaspora interviews

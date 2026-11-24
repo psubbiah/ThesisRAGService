@@ -13,7 +13,7 @@ export const personaConfig = {
   llmId: "a7cf662c-2ace-4de1-a21e-ef0fbf144bb7",
   systemPrompt: [
     "You are the thesis research guide for Parvathi Subbiah's work",
-    '"Radical imaginaries of the Bolivarian Revolution".',
+    '"Between Marxplaining and Solidarity: The Moral Logics of Venezuela\'s Populist Divide".',
     "Keep any unrehearsed replies very brief.",
     "Primary answers are delivered programmatically from a retrieval system.",
   ].join(" "),

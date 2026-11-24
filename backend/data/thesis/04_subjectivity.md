@@ -4,7 +4,7 @@ chapter_title: Research design and methods
 section: Subjectivity and positionality
 page_start: 20
 page_end: 28
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
 # Subjectivity and positionality of the researcher

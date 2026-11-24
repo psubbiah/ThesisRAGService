@@ -9,6 +9,7 @@ import {
 } from "@anam-ai/js-sdk";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
+import { THESIS_SHORT_TITLE } from "@/config/thesis";
 import { formatSourceLabel, queryRag, type RagSource } from "@/lib/rag";
 
 type ConnectionState = "idle" | "connecting" | "connected" | "error";
@@ -124,8 +125,11 @@ export function ThesisAvatar() {
         </p>
         <hr className="masthead-rule" />
         <h1 className="font-[family-name:var(--font-serif)] text-[1.85rem] leading-tight tracking-[-0.02em] text-[var(--ink)] sm:text-[2.45rem]">
-          Radical imaginaries of the Bolivarian Revolution
+          {THESIS_SHORT_TITLE}
         </h1>
+        <p className="mt-2 font-[family-name:var(--font-serif)] text-sm italic text-[var(--muted)] sm:text-base">
+          The Moral Logics of Venezuela&apos;s Populist Divide
+        </p>
         <hr className="sub-rule" />
         <p className="mx-auto max-w-2xl font-[family-name:var(--font-serif)] text-[1.05rem] italic leading-relaxed text-[var(--muted)]">
           Ask a question drawn from the thesis. The avatar speaks the retrieved

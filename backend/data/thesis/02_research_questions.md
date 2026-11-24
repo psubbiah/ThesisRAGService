@@ -4,7 +4,7 @@ chapter_title: Introduction
 section: Principal research questions
 page_start: 3
 page_end: 5
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
 # Principal research questions

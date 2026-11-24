@@ -3,7 +3,7 @@ chapter: 2
 chapter_title: Research design and methods
 page_start: 15
 page_end: 44
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
 # Research undertaken and methods

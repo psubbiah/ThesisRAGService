@@ -1,3 +1,5 @@
+import { THESIS_TITLE } from "@/config/thesis";
+
 export type RagSource = {
   title: string;
   content: string;
@@ -25,7 +27,7 @@ export function formatSourceLabel(source: RagSource): string {
   if (source.citation) return source.citation;
 
   const parts: string[] = [];
-  parts.push(source.work || "Radical imaginaries of the Bolivarian Revolution");
+  parts.push(source.work || THESIS_TITLE);
 
   if (source.chapter != null) {
     const chapterName = source.chapter_title || source.title;

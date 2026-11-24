@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville, Source_Sans_3 } from "next/font/google";
 
+import { THESIS_SHORT_TITLE, THESIS_TITLE } from "@/config/thesis";
+
 import "./globals.css";
 
 const libreBaskerville = Libre_Baskerville({
@@ -17,9 +19,8 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Radical Imaginaries — Thesis Avatar",
-  description:
-    "Ask questions about Radical imaginaries of the Bolivarian Revolution, answered through retrieval and spoken by an Anam avatar.",
+  title: `${THESIS_SHORT_TITLE} — Thesis Avatar`,
+  description: `Ask questions about ${THESIS_TITLE}, answered through retrieval and spoken by an Anam avatar.`,
 };
 
 export default function RootLayout({

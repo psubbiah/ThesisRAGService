@@ -7,6 +7,7 @@ from typing import Any
 from langchain_core.documents import Document
 
 from app.config import DATA_DIR
+from app.thesis_meta import THESIS_TITLE
 
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n(.*)\Z", re.DOTALL)
 
@@ -32,7 +33,7 @@ def load_thesis_documents(data_dir: Path | None = None) -> list[Document]:
         chapter_title = meta.get("chapter_title") or title
         page_start = _as_int(meta.get("page_start"))
         page_end = _as_int(meta.get("page_end")) or page_start
-        work = meta.get("work") or "Radical imaginaries of the Bolivarian Revolution"
+        work = meta.get("work") or THESIS_TITLE
 
         documents.append(
             Document(

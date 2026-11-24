@@ -3,7 +3,7 @@ chapter: 3
 chapter_title: Solidarity activists and transnational imaginaries
 page_start: 45
 page_end: 88
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
 # Themes from non-Venezuelan solidarity activist interviews

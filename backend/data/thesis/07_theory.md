@@ -3,7 +3,7 @@ chapter: 5
 chapter_title: Theoretical contributions
 page_start: 127
 page_end: 148
-work: Radical imaginaries of the Bolivarian Revolution
+work: Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide
 ---
 
 # Theoretical contributions

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.models import HealthResponse, QueryRequest, QueryResponse
 from app.rag import get_rag_service
+from app.thesis_meta import THESIS_SHORT_TITLE
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("thesis-rag")
@@ -27,7 +28,7 @@ settings = get_settings()
 app = FastAPI(
     title="Thesis RAG Service",
     version="2.0.0",
-    description="RAG over Radical imaginaries of the Bolivarian Revolution for Anam avatar Q&A",
+    description=f"RAG over {THESIS_SHORT_TITLE} for Anam avatar Q&A",
     lifespan=lifespan,
 )
 

@@ -1,6 +1,8 @@
 # ThesisRAGService
 
-Modern rebuild of the thesis Q&A avatar demo: **FastAPI + FAISS RAG** over *Radical imaginaries of the Bolivarian Revolution*, spoken by an **Anam** avatar (custom photo likeness).
+Modern rebuild of the thesis Q&A avatar demo: **FastAPI + FAISS RAG** over
+*Between Marxplaining and Solidarity: The Moral Logics of Venezuela's Populist Divide*,
+spoken by an **Anam** avatar (custom photo likeness).
 
 The historic HeyGen demo remains in [`psubbiah/heygen-rag-demo`](https://github.com/psubbiah/heygen-rag-demo) and is not modified by this project.
 

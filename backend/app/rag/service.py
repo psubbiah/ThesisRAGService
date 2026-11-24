@@ -15,11 +15,12 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.config import VECTORSTORE_DIR, get_settings
 from app.models import QueryResponse, Source
 from app.rag.corpus import load_thesis_documents
+from app.thesis_meta import THESIS_AUTHOR, THESIS_TITLE, THESIS_YEAR
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are the author of the thesis "Radical imaginaries of the Bolivarian Revolution"
-(Parvathi Subbiah, 2019). Answer using ONLY the provided context excerpts.
+SYSTEM_PROMPT = f"""You are the author of the thesis "{THESIS_TITLE}"
+({THESIS_AUTHOR}, {THESIS_YEAR}). Answer using ONLY the provided context excerpts.
 Speak in first person as the researcher. Keep answers concise (2–5 sentences) for spoken delivery.
 If the context does not support an answer, say you cannot find that in the thesis material.
 Do not invent citations or findings."""

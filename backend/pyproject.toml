@@ -1,7 +1,7 @@
 [project]
 name = "thesis-rag-service"
 version = "2.0.0"
-description = "FastAPI RAG over Radical imaginaries of the Bolivarian Revolution"
+description = "FastAPI RAG over Between Marxplaining and Solidarity"
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
