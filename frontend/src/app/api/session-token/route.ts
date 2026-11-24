@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { personaConfig } from "@/config/persona";
+import { buildAnamPersonaConfig } from "@/lib/anamPersona";
+import { readServerEnv } from "@/lib/serverEnv";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST() {
-  const apiKey = process.env.ANAM_API_KEY;
+  const apiKey = readServerEnv("ANAM_API_KEY");
 
   if (!apiKey) {
     return NextResponse.json(
@@ -11,6 +15,8 @@ export async function POST() {
       { status: 500 },
     );
   }
+
+  const personaConfig = buildAnamPersonaConfig();
 
   try {
     const response = await fetch("https://api.anam.ai/v1/auth/session-token", {
@@ -32,7 +38,11 @@ export async function POST() {
     }
 
     const data = await response.json();
-    return NextResponse.json({ sessionToken: data.sessionToken });
+    return NextResponse.json({
+      sessionToken: data.sessionToken,
+      // Non-secret diagnostics so we can see which path is live.
+      mode: "personaId" in personaConfig ? "saved-persona" : "ephemeral",
+    });
   } catch (error) {
     console.error("Error fetching session token:", error);
     return NextResponse.json(
