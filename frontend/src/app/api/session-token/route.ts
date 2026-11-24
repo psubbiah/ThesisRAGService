@@ -26,7 +26,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const personaConfig = buildAnamPersonaConfig();
+  let requestedPersonaId: string | undefined;
+  try {
+    const body = (await request.json()) as { personaId?: unknown };
+    if (typeof body?.personaId === "string") {
+      requestedPersonaId = body.personaId;
+    }
+  } catch {
+    // Empty body is fine — fall back to default persona.
+  }
+
+  const personaConfig = buildAnamPersonaConfig(requestedPersonaId);
 
   try {
     const response = await fetch("https://api.anam.ai/v1/auth/session-token", {

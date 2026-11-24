@@ -9,13 +9,68 @@ import {
 } from "@anam-ai/js-sdk";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
+import {
+  ANAM_PERSONA_ID,
+  ANAM_PERSONA_OPTIONS,
+  type AnamPersonaOptionId,
+} from "@/config/persona";
 import { THESIS_SHORT_TITLE } from "@/config/thesis";
 import { formatSourceLabel, queryRag, type RagSource } from "@/lib/rag";
 
 type ConnectionState = "idle" | "connecting" | "connected" | "error";
 
-async function fetchSessionToken(): Promise<string> {
-  const response = await fetch("/api/session-token", { method: "POST" });
+function AvatarPersonaPicker({
+  selectedPersonaId,
+  onChange,
+}: {
+  selectedPersonaId: AnamPersonaOptionId;
+  onChange: (id: AnamPersonaOptionId) => void;
+}) {
+  return (
+    <fieldset className="flex w-full max-w-md flex-col gap-2 text-left">
+      <legend className="mb-1 font-[family-name:var(--font-sans)] text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[#f6f3ee]/80">
+        Choose avatar
+      </legend>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {ANAM_PERSONA_OPTIONS.map((option) => {
+          const selected = option.id === selectedPersonaId;
+          return (
+            <label
+              key={option.id}
+              className={`cursor-pointer border px-3 py-2 transition ${
+                selected
+                  ? "border-[#f6f3ee] bg-[#f6f3ee]/12"
+                  : "border-white/25 hover:border-white/50"
+              }`}
+            >
+              <input
+                type="radio"
+                name="anam-persona"
+                value={option.id}
+                checked={selected}
+                onChange={() => onChange(option.id)}
+                className="sr-only"
+              />
+              <span className="block font-[family-name:var(--font-sans)] text-sm font-semibold text-[#f6f3ee]">
+                {option.label}
+              </span>
+              <span className="mt-0.5 block font-[family-name:var(--font-serif)] text-xs text-[#f6f3ee]/75">
+                {option.description}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+async function fetchSessionToken(personaId: string): Promise<string> {
+  const response = await fetch("/api/session-token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ personaId }),
+  });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Failed to get session token");
@@ -26,6 +81,8 @@ async function fetchSessionToken(): Promise<string> {
 export function ThesisAvatar() {
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("idle");
+  const [selectedPersonaId, setSelectedPersonaId] =
+    useState<AnamPersonaOptionId>(ANAM_PERSONA_ID);
   const [error, setError] = useState<string | null>(null);
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
@@ -52,7 +109,7 @@ export function ThesisAvatar() {
     setSources([]);
 
     try {
-      const sessionToken = await fetchSessionToken();
+      const sessionToken = await fetchSessionToken(selectedPersonaId);
       const client = createClient(sessionToken);
       clientRef.current = client;
 
@@ -82,7 +139,7 @@ export function ThesisAvatar() {
       setError(err instanceof Error ? err.message : "Failed to start session");
       setConnectionState("error");
     }
-  }, []);
+  }, [selectedPersonaId]);
 
   useEffect(() => {
     return () => {
@@ -185,6 +242,10 @@ export function ThesisAvatar() {
                   <p className="max-w-md font-[family-name:var(--font-serif)] text-[#f6f3ee]">
                     {error || "Could not start the avatar session."}
                   </p>
+                  <AvatarPersonaPicker
+                    selectedPersonaId={selectedPersonaId}
+                    onChange={setSelectedPersonaId}
+                  />
                   <button
                     type="button"
                     onClick={startSession}
@@ -198,6 +259,10 @@ export function ThesisAvatar() {
                   <p className="max-w-sm font-[family-name:var(--font-serif)] text-lg text-[#f6f3ee]">
                     Begin a live session with the thesis avatar.
                   </p>
+                  <AvatarPersonaPicker
+                    selectedPersonaId={selectedPersonaId}
+                    onChange={setSelectedPersonaId}
+                  />
                   <button
                     type="button"
                     onClick={startSession}
