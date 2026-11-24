@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f6f3ee;
+  --ink: #121212;
+  --muted: #5c5c5c;
+  --rule: #d6d1c8;
+  --accent: #e3120b;
+  --accent-dark: #b40e09;
+  --panel: #fffdf8;
+  --shadow: 0 18px 40px rgba(18, 18, 18, 0.08);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-panel: var(--panel);
+  --font-serif: var(--font-libre-baskerville);
+  --font-sans: var(--font-source-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #fffdf8 0%, transparent 55%),
+    linear-gradient(180deg, #f8f5f0 0%, var(--paper) 40%, #efeae2 100%);
+  color: var(--ink);
+  font-family: var(--font-sans), "Source Sans 3", Georgia, serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 22%, white);
+}
+
+.rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+.masthead-rule {
+  border: 0;
+  border-top: 3px solid var(--ink);
+  margin: 0.35rem 0 0.2rem;
+}
+
+.sub-rule {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  margin: 0 0 1.25rem;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease-out both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
