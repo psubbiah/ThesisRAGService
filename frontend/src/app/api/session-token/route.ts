@@ -24,9 +24,9 @@ export async function POST() {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Anam API error:", error);
+      console.error("Anam API error:", error.slice(0, 300));
       return NextResponse.json(
-        { error: "Failed to get session token", details: error },
+        { error: "Failed to get session token" },
         { status: response.status },
       );
     }
