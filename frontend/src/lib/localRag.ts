@@ -3,7 +3,6 @@ import path from "path";
 
 import { THESIS_AUTHOR, THESIS_TITLE } from "@/config/thesis";
 import type { RagResponse, RagSource } from "@/lib/rag";
-import { describeApiKeyShape } from "@/lib/serverEnv";
 
 type Doc = {
   title: string;
@@ -442,9 +441,7 @@ export async function localThesisQuery(
       query: question,
       synthesized: mode === "local-openai",
       openai_configured: Boolean(apiKey),
-      openai_model: apiKey ? model : null,
       openai_error: openaiError || null,
-      openai_key_shape: describeApiKeyShape(apiKey),
     },
   };
 }

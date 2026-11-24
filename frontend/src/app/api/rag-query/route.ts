@@ -1,5 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
+import {
+  MAX_QUERY_CHARS,
+  publicRagMetadata,
+  rateLimit,
+  readJsonBody,
+  requireAppViewer,
+  viewerKey,
+} from "@/lib/apiGuard";
 import { localThesisQuery } from "@/lib/localRag";
 import { readServerEnv } from "@/lib/serverEnv";
 
@@ -34,13 +42,37 @@ async function queryBackend(question: string, baseUrl: string) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
+  const identity = await requireAppViewer(request);
+  if (identity instanceof Response) return identity;
+
+  const limited = rateLimit(viewerKey(identity), "rag-query", 20);
+  if (limited) return limited;
+
   try {
-    const body = await request.json();
-    const query = (body.query || body.text || "").trim();
+    const parsed = await readJsonBody(request);
+    if (!parsed.ok) return parsed.response;
+
+    const body = (parsed.body || {}) as {
+      query?: unknown;
+      text?: unknown;
+    };
+    const query = String(body.query || body.text || "").trim();
 
     if (!query) {
-      return NextResponse.json({ error: "Query is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Query is required" },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } },
+      );
+    }
+
+    if (query.length > MAX_QUERY_CHARS) {
+      return NextResponse.json(
+        {
+          error: `Query too long (max ${MAX_QUERY_CHARS} characters)`,
+        },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } },
+      );
     }
 
     // Only hit FastAPI when explicitly configured — hosted apps must not
@@ -57,17 +89,26 @@ export async function POST(request: NextRequest) {
           ragData.text;
 
         if (answer) {
-          return NextResponse.json({
-            answer,
-            sources:
-              ragData.sources || ragData.documents || ragData.references || [],
-            confidence:
-              ragData.confidence ?? ragData.score ?? ragData.certainty ?? 1.0,
-            metadata: {
-              ...(ragData.metadata || ragData.meta || {}),
-              via: "fastapi",
+          return NextResponse.json(
+            {
+              answer,
+              sources:
+                ragData.sources ||
+                ragData.documents ||
+                ragData.references ||
+                [],
+              confidence:
+                ragData.confidence ??
+                ragData.score ??
+                ragData.certainty ??
+                1.0,
+              metadata: publicRagMetadata({
+                ...(ragData.metadata || ragData.meta || {}),
+                via: "fastapi",
+              }),
             },
-          });
+            { headers: { "Cache-Control": "private, no-store" } },
+          );
         }
       } catch (error) {
         console.warn(
@@ -85,16 +126,21 @@ export async function POST(request: NextRequest) {
       openaiChatModel,
     });
 
-    return NextResponse.json({
-      ...local,
-      metadata: {
-        ...local.metadata,
-        via:
-          local.metadata?.rag_mode === "local-openai"
-            ? "local-openai"
-            : "local-lexical",
+    return NextResponse.json(
+      {
+        answer: local.answer,
+        sources: local.sources,
+        confidence: local.confidence,
+        metadata: publicRagMetadata({
+          ...local.metadata,
+          via:
+            local.metadata?.rag_mode === "local-openai"
+              ? "local-openai"
+              : "local-lexical",
+        }),
       },
-    });
+      { headers: { "Cache-Control": "private, no-store" } },
+    );
   } catch (error) {
     console.error("Error querying RAG:", error);
     return NextResponse.json(
@@ -105,7 +151,7 @@ export async function POST(request: NextRequest) {
         sources: [],
         confidence: 0,
       },
-      { status: 500 },
+      { status: 500, headers: { "Cache-Control": "private, no-store" } },
     );
   }
 }
