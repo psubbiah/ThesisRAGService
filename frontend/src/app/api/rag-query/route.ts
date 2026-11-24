@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { localThesisQuery } from "@/lib/localRag";
+import { readServerEnv } from "@/lib/serverEnv";
 
-const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || "http://127.0.0.1:8000";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const TIMEOUT_MS = Number(process.env.RAG_TIMEOUT_MS || 8000);
 
-async function queryBackend(question: string) {
+async function queryBackend(question: string, baseUrl: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const response = await fetch(`${RAG_SERVICE_URL}/query`, {
+    const response = await fetch(`${baseUrl}/query`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,41 +43,56 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    try {
-      const ragData = await queryBackend(query);
-      const answer =
-        ragData.answer ||
-        ragData.response ||
-        ragData.content ||
-        ragData.result ||
-        ragData.text;
+    // Only hit FastAPI when explicitly configured — hosted apps must not
+    // stall on a default localhost backend that does not exist.
+    const ragServiceUrl = readServerEnv("RAG_SERVICE_URL");
+    if (ragServiceUrl) {
+      try {
+        const ragData = await queryBackend(query, ragServiceUrl);
+        const answer =
+          ragData.answer ||
+          ragData.response ||
+          ragData.content ||
+          ragData.result ||
+          ragData.text;
 
-      if (answer) {
-        return NextResponse.json({
-          answer,
-          sources:
-            ragData.sources || ragData.documents || ragData.references || [],
-          confidence:
-            ragData.confidence ?? ragData.score ?? ragData.certainty ?? 1.0,
-          metadata: {
-            ...(ragData.metadata || ragData.meta || {}),
-            via: "fastapi",
-          },
-        });
+        if (answer) {
+          return NextResponse.json({
+            answer,
+            sources:
+              ragData.sources || ragData.documents || ragData.references || [],
+            confidence:
+              ragData.confidence ?? ragData.score ?? ragData.certainty ?? 1.0,
+            metadata: {
+              ...(ragData.metadata || ragData.meta || {}),
+              via: "fastapi",
+            },
+          });
+        }
+      } catch (error) {
+        console.warn(
+          "FastAPI RAG unavailable, using local thesis corpus:",
+          error instanceof Error ? error.message : error,
+        );
       }
-    } catch (error) {
-      console.warn(
-        "FastAPI RAG unavailable, using local thesis corpus:",
-        error instanceof Error ? error.message : error,
-      );
     }
 
-    const local = await localThesisQuery(query);
+    const openaiApiKey = readServerEnv("OPENAI_API_KEY");
+    const openaiChatModel = readServerEnv("OPENAI_CHAT_MODEL") || "gpt-4o-mini";
+
+    const local = await localThesisQuery(query, {
+      openaiApiKey,
+      openaiChatModel,
+    });
+
     return NextResponse.json({
       ...local,
       metadata: {
         ...local.metadata,
-        via: local.metadata?.rag_mode === "local-openai" ? "local-openai" : "local-lexical",
+        via:
+          local.metadata?.rag_mode === "local-openai"
+            ? "local-openai"
+            : "local-lexical",
       },
     });
   } catch (error) {

@@ -30,6 +30,7 @@ export function ThesisAvatar() {
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
   const [answer, setAnswer] = useState<string | null>(null);
+  const [answerMode, setAnswerMode] = useState<string | null>(null);
   const [sources, setSources] = useState<RagSource[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const clientRef = useRef<AnamClient | null>(null);
@@ -47,6 +48,7 @@ export function ThesisAvatar() {
     setConnectionState("connecting");
     setError(null);
     setAnswer(null);
+    setAnswerMode(null);
     setSources([]);
 
     try {
@@ -103,6 +105,18 @@ export function ThesisAvatar() {
         const rag = await queryRag(q);
         setAnswer(rag.answer);
         setSources(rag.sources || []);
+        const meta = rag.metadata || {};
+        if (meta.synthesized) {
+          setAnswerMode("Paraphrased from thesis sources");
+        } else if (meta.openai_configured === false) {
+          setAnswerMode("Excerpt only — OpenAI key not available to the server");
+        } else if (meta.openai_error) {
+          setAnswerMode(`Excerpt only — model error: ${String(meta.openai_error)}`);
+        } else {
+          setAnswerMode(
+            meta.rag_mode ? `Mode: ${String(meta.rag_mode)}` : null,
+          );
+        }
         setQuestion("");
 
         if (clientRef.current && connectionState === "connected") {
@@ -247,6 +261,11 @@ export function ThesisAvatar() {
               <h2 className="font-[family-name:var(--font-sans)] text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
                 Answer
               </h2>
+              {answerMode && (
+                <p className="mt-1 font-[family-name:var(--font-sans)] text-[0.65rem] uppercase tracking-[0.14em] text-[var(--muted)]">
+                  {answerMode}
+                </p>
+              )}
               <p className="mt-2 font-[family-name:var(--font-serif)] text-lg leading-relaxed text-[var(--ink)]">
                 {answer}
               </p>

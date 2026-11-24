@@ -246,8 +246,18 @@ function toSources(
   }));
 }
 
+function cleanExcerpt(text: string, limit = 220): string {
+  const cleaned = text
+    .replace(/^#+\s*.+$/gm, "")
+    .replace(/\*\*/g, "")
+    .replace(/^\s*\d+\.\s*/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return excerpt(cleaned, limit);
+}
+
+/** Spoken-safe fallback — never includes developer env instructions. */
 function extractiveAnswer(
-  question: string,
   chosen: { chunk: Chunk; score: number }[],
 ): string {
   if (!chosen.length) {
@@ -256,19 +266,11 @@ function extractiveAnswer(
       "Try asking about the research questions, methods, solidarity activists, or the diaspora interviews."
     );
   }
-  const bits = chosen.slice(0, 2).map(({ chunk }) => {
-    const cleaned = chunk.text
-      .replace(/^#+\s*.+$/gm, "")
-      .replace(/\*\*/g, "")
-      .replace(/^\s*\d+\.\s*/gm, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    return excerpt(cleaned, 220);
-  });
+  const bits = chosen.slice(0, 2).map(({ chunk }) => cleanExcerpt(chunk.text, 180));
   return (
-    "From the thesis notes: " +
+    "Drawing briefly from the thesis notes: " +
     bits.join(" ") +
-    " (OpenAI synthesis unavailable — add OPENAI_API_KEY for a spoken paraphrase.)"
+    " I can say more once the language model is available again."
   );
 }
 
@@ -276,6 +278,7 @@ async function synthesizeWithOpenAI(
   question: string,
   chosen: { chunk: Chunk; score: number }[],
   apiKey: string,
+  model: string,
 ): Promise<string> {
   const context = chosen
     .map(
@@ -284,62 +287,90 @@ async function synthesizeWithOpenAI(
     )
     .join("\n\n---\n\n");
 
-  const model = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.35,
-      max_tokens: 320,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Context:\n${context}\n\nQuestion: ${question}\n\nAnswer:`,
-        },
-      ],
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`OpenAI ${response.status}: ${errText.slice(0, 200)}`);
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        temperature: 0.35,
+        max_tokens: 320,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: `Context:\n${context}\n\nQuestion: ${question}\n\nAnswer:`,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      let detail = "";
+      try {
+        const errJson = (await response.json()) as {
+          error?: { message?: string; code?: string; type?: string };
+        };
+        detail =
+          errJson.error?.code ||
+          errJson.error?.type ||
+          errJson.error?.message?.slice(0, 120) ||
+          "";
+      } catch {
+        detail = (await response.text()).slice(0, 120);
+      }
+      throw new Error(`OpenAI HTTP ${response.status}${detail ? `: ${detail}` : ""}`);
+    }
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const content = data.choices?.[0]?.message?.content?.trim();
+    if (!content) throw new Error("OpenAI returned an empty answer");
+    return content;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) throw new Error("OpenAI returned an empty answer");
-  return content;
 }
 
-export async function localThesisQuery(question: string): Promise<RagResponse> {
+export type LocalThesisOptions = {
+  openaiApiKey?: string;
+  openaiChatModel?: string;
+};
+
+export async function localThesisQuery(
+  question: string,
+  options: LocalThesisOptions = {},
+): Promise<RagResponse> {
   const chosen = retrieveChunks(question, 5);
   const sources = toSources(chosen);
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = options.openaiApiKey?.trim();
+  const model = options.openaiChatModel || "gpt-4o-mini";
 
   let answer: string;
   let mode = "local-lexical";
+  let openaiError: string | undefined;
 
   if (apiKey) {
     try {
-      answer = await synthesizeWithOpenAI(question, chosen, apiKey);
+      answer = await synthesizeWithOpenAI(question, chosen, apiKey, model);
       mode = "local-openai";
     } catch (error) {
-      console.warn(
-        "OpenAI synthesis failed; falling back to extractive answer:",
-        error instanceof Error ? error.message : error,
-      );
-      answer = extractiveAnswer(question, chosen);
+      openaiError = error instanceof Error ? error.message : "unknown error";
+      console.warn("OpenAI synthesis failed; falling back to extractive answer:", openaiError);
+      answer = extractiveAnswer(chosen);
       mode = "local-lexical-fallback";
     }
   } else {
-    answer = extractiveAnswer(question, chosen);
+    answer = extractiveAnswer(chosen);
+    openaiError = "OPENAI_API_KEY not present in server environment";
   }
 
   return {
@@ -353,6 +384,9 @@ export async function localThesisQuery(question: string): Promise<RagResponse> {
       documents_retrieved: sources.length,
       query: question,
       synthesized: mode === "local-openai",
+      openai_configured: Boolean(apiKey),
+      openai_model: apiKey ? model : null,
+      openai_error: openaiError || null,
     },
   };
 }
