@@ -1,16 +1,21 @@
-import { personaConfig as basePersona } from "@/config/persona";
+import {
+  ANAM_PERSONA_ID,
+  personaConfig as basePersona,
+} from "@/config/persona";
 import { readServerEnv } from "@/lib/serverEnv";
 
 /**
  * Build the Anam personaConfig for session-token minting.
  *
- * Prefer a saved Lab persona (`ANAM_PERSONA_ID`) when set — that package
- * already includes likeness + voice + Lab prompt.
- * Otherwise send an ephemeral config (avatar + voice + our system prompt),
- * optionally overriding voice with `ANAM_VOICE_ID`.
+ * Default: saved Lab persona (likeness + cloned voice + Lab prompt).
+ * Override with ANAM_PERSONA_ID env, or fall back to ephemeral avatar/voice
+ * if ANAM_USE_EPHEMERAL=1.
  */
 export function buildAnamPersonaConfig(): Record<string, unknown> {
-  const personaId = readServerEnv("ANAM_PERSONA_ID");
+  const useEphemeral = readServerEnv("ANAM_USE_EPHEMERAL") === "1";
+  const personaId =
+    readServerEnv("ANAM_PERSONA_ID") || (!useEphemeral ? ANAM_PERSONA_ID : undefined);
+
   if (personaId) {
     return { personaId };
   }
