@@ -69,10 +69,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const local = localThesisQuery(query);
+    const local = await localThesisQuery(query);
     return NextResponse.json({
       ...local,
-      metadata: { ...local.metadata, via: "local-lexical" },
+      metadata: {
+        ...local.metadata,
+        via: local.metadata?.rag_mode === "local-openai" ? "local-openai" : "local-lexical",
+      },
     });
   } catch (error) {
     console.error("Error querying RAG:", error);
@@ -81,11 +84,10 @@ export async function POST(request: NextRequest) {
         answer:
           "I apologise — I could not search the thesis knowledge base just now.",
         error: "Failed to query RAG service",
-        details: error instanceof Error ? error.message : "Unknown error",
         sources: [],
         confidence: 0,
       },
-      { status: 200 },
+      { status: 500 },
     );
   }
 }

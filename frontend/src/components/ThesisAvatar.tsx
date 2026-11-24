@@ -132,8 +132,8 @@ export function ThesisAvatar() {
         </p>
         <hr className="sub-rule" />
         <p className="mx-auto max-w-2xl font-[family-name:var(--font-serif)] text-[1.05rem] italic leading-relaxed text-[var(--muted)]">
-          Ask a question drawn from the thesis. The avatar speaks the retrieved
-          answer.
+          Ask a question drawn from the thesis. An LLM grounds the reply in the
+          retrieved chapters, then the avatar speaks it.
         </p>
       </header>
 
@@ -223,7 +223,9 @@ export function ThesisAvatar() {
         </form>
         <p className="mt-3 font-[family-name:var(--font-sans)] text-xs tracking-wide text-[var(--muted)]">
           Retrieval runs against the thesis corpus
-          {process.env.NODE_ENV === "development" ? " (sample / lexical OK without OpenAI)" : ""}.{" "}
+          {process.env.NODE_ENV === "development"
+            ? " (needs OPENAI_API_KEY for synthesised answers)"
+            : ""}{" "}
           {connectionState === "connected"
             ? "The avatar will speak the answer."
             : "Start the avatar to hear the answer spoken; text Q&A works without it."}
