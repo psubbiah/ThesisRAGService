@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const RAG_SERVICE_URL =
-  process.env.RAG_SERVICE_URL || "http://127.0.0.1:8000";
-const TIMEOUT_MS = Number(process.env.RAG_TIMEOUT_MS || 30000);
+import { localThesisQuery } from "@/lib/localRag";
 
-const FALLBACK =
-  "I apologise — I could not reach the thesis knowledge base just now. Please try again in a moment.";
+const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || "http://127.0.0.1:8000";
+const TIMEOUT_MS = Number(process.env.RAG_TIMEOUT_MS || 8000);
 
 async function queryBackend(question: string) {
   const controller = new AbortController();
@@ -18,7 +16,6 @@ async function queryBackend(question: string) {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      // Match the original working client contract
       body: JSON.stringify({ text: question }),
       signal: controller.signal,
     });
@@ -43,35 +40,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    const ragData = await queryBackend(query);
-    const answer =
-      ragData.answer ||
-      ragData.response ||
-      ragData.content ||
-      ragData.result ||
-      ragData.text;
+    try {
+      const ragData = await queryBackend(query);
+      const answer =
+        ragData.answer ||
+        ragData.response ||
+        ragData.content ||
+        ragData.result ||
+        ragData.text;
 
-    if (!answer) {
-      return NextResponse.json({
-        answer: FALLBACK,
-        sources: [],
-        confidence: 0,
-        warning: "No answer found in RAG response",
-      });
+      if (answer) {
+        return NextResponse.json({
+          answer,
+          sources:
+            ragData.sources || ragData.documents || ragData.references || [],
+          confidence:
+            ragData.confidence ?? ragData.score ?? ragData.certainty ?? 1.0,
+          metadata: {
+            ...(ragData.metadata || ragData.meta || {}),
+            via: "fastapi",
+          },
+        });
+      }
+    } catch (error) {
+      console.warn(
+        "FastAPI RAG unavailable, using local thesis corpus:",
+        error instanceof Error ? error.message : error,
+      );
     }
 
+    const local = localThesisQuery(query);
     return NextResponse.json({
-      answer,
-      sources: ragData.sources || ragData.documents || ragData.references || [],
-      confidence:
-        ragData.confidence ?? ragData.score ?? ragData.certainty ?? 1.0,
-      metadata: ragData.metadata || ragData.meta || {},
+      ...local,
+      metadata: { ...local.metadata, via: "local-lexical" },
     });
   } catch (error) {
-    console.error("Error querying RAG service:", error);
+    console.error("Error querying RAG:", error);
     return NextResponse.json(
       {
-        answer: FALLBACK,
+        answer:
+          "I apologise — I could not search the thesis knowledge base just now.",
         error: "Failed to query RAG service",
         details: error instanceof Error ? error.message : "Unknown error",
         sources: [],

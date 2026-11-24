@@ -222,10 +222,11 @@ export function ThesisAvatar() {
           </button>
         </form>
         <p className="mt-3 font-[family-name:var(--font-sans)] text-xs tracking-wide text-[var(--muted)]">
-          Retrieval runs against the thesis corpus.{" "}
+          Retrieval runs against the thesis corpus
+          {process.env.NODE_ENV === "development" ? " (sample / lexical OK without OpenAI)" : ""}.{" "}
           {connectionState === "connected"
             ? "The avatar will speak the answer."
-            : "Start the avatar to hear the answer spoken; text still works without it."}
+            : "Start the avatar to hear the answer spoken; text Q&A works without it."}
         </p>
       </section>
 
