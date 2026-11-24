@@ -1,3 +1,11 @@
+---
+chapter: 3
+chapter_title: Solidarity activists and transnational imaginaries
+page_start: 45
+page_end: 88
+work: Radical imaginaries of the Bolivarian Revolution
+---
+
 # Themes from non-Venezuelan solidarity activist interviews
 
 Key ideas that permeate solidarity activist interviews:

@@ -9,7 +9,7 @@ import {
 } from "@anam-ai/js-sdk";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
-import { queryRag, type RagSource } from "@/lib/rag";
+import { formatSourceLabel, queryRag, type RagSource } from "@/lib/rag";
 
 type ConnectionState = "idle" | "connecting" | "connected" | "error";
 
@@ -262,8 +262,15 @@ export function ThesisAvatar() {
                     </span>
                     <div>
                       <p className="font-[family-name:var(--font-sans)] text-sm font-semibold text-[var(--ink)]">
-                        {source.title}
+                        {formatSourceLabel(source)}
                       </p>
+                      {source.chapter_title &&
+                        source.title &&
+                        source.title !== source.chapter_title && (
+                          <p className="mt-0.5 font-[family-name:var(--font-sans)] text-xs uppercase tracking-[0.12em] text-[var(--muted)]">
+                            {source.title}
+                          </p>
+                        )}
                       <p className="mt-1 font-[family-name:var(--font-serif)] text-sm leading-relaxed text-[var(--muted)]">
                         {source.content}
                       </p>

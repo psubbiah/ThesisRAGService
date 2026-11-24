@@ -1,3 +1,11 @@
+---
+chapter: 2
+chapter_title: Research design and methods
+page_start: 15
+page_end: 44
+work: Radical imaginaries of the Bolivarian Revolution
+---
+
 # Research undertaken and methods
 
 ## Interviews with solidarity activists

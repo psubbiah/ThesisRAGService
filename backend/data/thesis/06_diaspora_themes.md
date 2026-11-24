@@ -1,3 +1,11 @@
+---
+chapter: 4
+chapter_title: Venezuelan diaspora perspectives
+page_start: 89
+page_end: 126
+work: Radical imaginaries of the Bolivarian Revolution
+---
+
 # Themes from Venezuelan diaspora interviews
 
 ## Why they left

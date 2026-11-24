@@ -26,6 +26,11 @@ def test_query_with_text_field():
     assert data["answer"]
     assert isinstance(data["sources"], list)
     assert "confidence" in data
+    assert data["sources"]
+    first = data["sources"][0]
+    assert first.get("chapter") is not None
+    assert first.get("citation")
+    assert "Ch." in first["citation"]
 
 
 def test_query_with_query_field():

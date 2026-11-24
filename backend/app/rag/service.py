@@ -103,7 +103,13 @@ class ThesisRagService:
             Source(
                 title=d.metadata.get("title") or d.metadata.get("source") or "Thesis excerpt",
                 content=_excerpt(d.page_content),
-                page=None,
+                chapter=d.metadata.get("chapter"),
+                chapter_title=d.metadata.get("chapter_title"),
+                page=d.metadata.get("page") or d.metadata.get("page_start"),
+                page_start=d.metadata.get("page_start"),
+                page_end=d.metadata.get("page_end"),
+                work=d.metadata.get("work"),
+                citation=d.metadata.get("citation"),
                 url=d.metadata.get("source"),
                 score=d.metadata.get("score"),
             )

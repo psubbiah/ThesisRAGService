@@ -1,3 +1,12 @@
+---
+chapter: 2
+chapter_title: Research design and methods
+section: Subjectivity and positionality
+page_start: 20
+page_end: 28
+work: Radical imaginaries of the Bolivarian Revolution
+---
+
 # Subjectivity and positionality of the researcher
 
 The researcher’s family — especially her mother and grandmother — were fervently against Hugo Chávez’s government. Growing up in Caracas with a brown, lower-middle-class neighbourhood background while attending school in a wealthy area made inequality and polarisation personally visible.

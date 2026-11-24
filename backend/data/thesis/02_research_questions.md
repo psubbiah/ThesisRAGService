@@ -1,3 +1,12 @@
+---
+chapter: 1
+chapter_title: Introduction
+section: Principal research questions
+page_start: 3
+page_end: 5
+work: Radical imaginaries of the Bolivarian Revolution
+---
+
 # Principal research questions
 
 1. What are the driving ideas of current international support for Chavismo?

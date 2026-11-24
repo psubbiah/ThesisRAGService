@@ -19,7 +19,13 @@ class QueryRequest(BaseModel):
 class Source(BaseModel):
     title: str
     content: str
+    chapter: int | None = None
+    chapter_title: str | None = None
     page: int | None = None
+    page_start: int | None = None
+    page_end: int | None = None
+    work: str | None = None
+    citation: str | None = None
     url: str | None = None
     score: float | None = None
 
