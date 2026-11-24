@@ -37,8 +37,8 @@ export const personaConfig = {
   personaId: ANAM_PERSONA_ID,
   avatarId: ANAM_AVATAR_ID,
   avatarModel: "cara-4.1-express",
-  // Fallback stock voice if ephemeral mode is used without ANAM_VOICE_ID.
-  voiceId: "de23e340-1416-4dd8-977d-065a7ca11697",
+  // Cloned voice (also used if ephemeral mode is forced without ANAM_VOICE_ID).
+  voiceId: "0cc6fa24-f25b-4e2e-a277-29608539fbcf",
   llmId: "a7cf662c-2ace-4de1-a21e-ef0fbf144bb7",
   systemPrompt: ANAM_LAB_SYSTEM_PROMPT,
 } as const;

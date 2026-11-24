@@ -8,8 +8,8 @@ import { readServerEnv } from "@/lib/serverEnv";
  * Build the Anam personaConfig for session-token minting.
  *
  * Default: saved Lab persona (likeness + cloned voice + Lab prompt).
- * Override with ANAM_PERSONA_ID env, or fall back to ephemeral avatar/voice
- * if ANAM_USE_EPHEMERAL=1.
+ * Override with ANAM_PERSONA_ID env, or fall back to ephemeral avatar +
+ * cloned voiceId if ANAM_USE_EPHEMERAL=1.
  */
 export function buildAnamPersonaConfig(): Record<string, unknown> {
   const useEphemeral = readServerEnv("ANAM_USE_EPHEMERAL") === "1";
