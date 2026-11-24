@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+backend/.venv/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/tsconfig.tsbuildinfo
+
+# Vector store / caches
+backend/.chroma/
+backend/data/vectorstore/
+backend/.cache/
+*.faiss
+*.pkl
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+.cursor/
+
+# Logs & coverage
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Misc
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
