@@ -3,6 +3,7 @@ import path from "path";
 
 import { THESIS_AUTHOR, THESIS_TITLE } from "@/config/thesis";
 import type { RagResponse, RagSource } from "@/lib/rag";
+import { describeApiKeyShape } from "@/lib/serverEnv";
 
 type Doc = {
   title: string;
@@ -256,7 +257,7 @@ function cleanExcerpt(text: string, limit = 220): string {
   return excerpt(cleaned, limit);
 }
 
-/** Spoken-safe fallback — never includes developer env instructions. */
+/** Spoken-safe fallback when the model is briefly unavailable (non-auth errors). */
 function extractiveAnswer(
   chosen: { chunk: Chunk; score: number }[],
 ): string {
@@ -271,6 +272,54 @@ function extractiveAnswer(
     "Drawing briefly from the thesis notes: " +
     bits.join(" ") +
     " I can say more once the language model is available again."
+  );
+}
+
+function spokenFailureMessage(openaiError: string, hasKey: boolean): string {
+  const lower = openaiError.toLowerCase();
+  if (!hasKey) {
+    return (
+      "I found the thesis material, but the OpenAI key is not available to this app yet, " +
+      "so I cannot paraphrase an answer. Please set OPENAI_API_KEY in App Secrets and try again."
+    );
+  }
+  if (
+    lower.includes("401") ||
+    lower.includes("invalid_api_key") ||
+    lower.includes("incorrect api key")
+  ) {
+    return (
+      "I found the thesis material, but OpenAI rejected the API key as invalid. " +
+      "This is not an avatar problem — please replace OPENAI_API_KEY in Cursor App Secrets " +
+      "with a fresh key from platform.openai.com, then ask again."
+    );
+  }
+  if (lower.includes("429") || lower.includes("quota") || lower.includes("rate")) {
+    return (
+      "I found the thesis material, but the OpenAI account hit a rate or quota limit. " +
+      "Please check billing and limits, then try again."
+    );
+  }
+  if (lower.includes("abort") || lower.includes("timeout") || lower.includes("fetch failed")) {
+    return (
+      "I found the thesis material, but I could not reach OpenAI just now. Please try again in a moment."
+    );
+  }
+  return (
+    "I found the thesis material, but the language model could not compose an answer just now. " +
+    "Please try again shortly."
+  );
+}
+
+function isAuthOrConfigFailure(openaiError: string, hasKey: boolean): boolean {
+  if (!hasKey) return true;
+  const lower = openaiError.toLowerCase();
+  return (
+    lower.includes("401") ||
+    lower.includes("invalid_api_key") ||
+    lower.includes("incorrect api key") ||
+    lower.includes("429") ||
+    lower.includes("quota")
   );
 }
 
@@ -364,13 +413,21 @@ export async function localThesisQuery(
       mode = "local-openai";
     } catch (error) {
       openaiError = error instanceof Error ? error.message : "unknown error";
-      console.warn("OpenAI synthesis failed; falling back to extractive answer:", openaiError);
-      answer = extractiveAnswer(chosen);
-      mode = "local-lexical-fallback";
+      console.warn("OpenAI synthesis failed:", openaiError);
+      // Auth/config failures: say so clearly. Do not read thesis excerpts —
+      // that made it look like an avatar/RAG wiring bug.
+      if (isAuthOrConfigFailure(openaiError, true)) {
+        answer = spokenFailureMessage(openaiError, true);
+        mode = "openai-auth-failed";
+      } else {
+        answer = extractiveAnswer(chosen);
+        mode = "local-lexical-fallback";
+      }
     }
   } else {
-    answer = extractiveAnswer(chosen);
     openaiError = "OPENAI_API_KEY not present in server environment";
+    answer = spokenFailureMessage(openaiError, false);
+    mode = "openai-missing";
   }
 
   return {
@@ -387,6 +444,7 @@ export async function localThesisQuery(
       openai_configured: Boolean(apiKey),
       openai_model: apiKey ? model : null,
       openai_error: openaiError || null,
+      openai_key_shape: describeApiKeyShape(apiKey),
     },
   };
 }

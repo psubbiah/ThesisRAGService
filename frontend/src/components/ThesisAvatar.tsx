@@ -108,6 +108,10 @@ export function ThesisAvatar() {
         const meta = rag.metadata || {};
         if (meta.synthesized) {
           setAnswerMode("Paraphrased from thesis sources");
+        } else if (meta.rag_mode === "openai-auth-failed") {
+          setAnswerMode(`OpenAI auth failed — ${String(meta.openai_error || "invalid key")}`);
+        } else if (meta.rag_mode === "openai-missing") {
+          setAnswerMode("OpenAI key missing on server");
         } else if (meta.openai_configured === false) {
           setAnswerMode("Excerpt only — OpenAI key not available to the server");
         } else if (meta.openai_error) {
